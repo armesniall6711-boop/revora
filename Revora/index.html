@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#6947e8"><link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png"><title>Revora | Revision Planner V3</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#25213a;background:#f5f3fb}
+*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{border:0;border-radius:11px;background:#6947e8;color:#fff;padding:11px 15px;cursor:pointer;font-weight:650}button:hover{background:#5032c5}button:disabled{opacity:.5;cursor:not-allowed}
+button.secondary{background:#ede8ff;color:#5a3bc9}button.danger{background:#fceaf0;color:#a33355}
+.wrap{max-width:1100px;margin:auto;padding:24px}header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}h1{margin:0;color:#6442db;font-size:2rem}h2{font-size:1.14rem;margin:0 0 15px}.muted{color:#77718a}.subtitle{margin:5px 0 0}.grid{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}.panel{background:white;border-radius:18px;padding:20px;margin-top:18px;box-shadow:0 5px 20px #33235a0d}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:#eee9ff;padding:14px;border-radius:12px;text-align:center}.stat strong{display:block;color:#6442db;font-size:1.6rem}.stat span{font-size:.8rem}
+form{display:grid;gap:10px}input,select{min-width:0;width:100%;padding:11px;border:1px solid #ded9ee;border-radius:10px;background:white;color:#29223c}label.field{display:grid;gap:5px;font-size:.88rem;font-weight:600}.formrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.task{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #eee}.task:last-child{border:0}.task input{width:18px;height:18px;accent-color:#6947e8}.task-info{flex:1;min-width:0;overflow-wrap:anywhere}.task small{display:block;color:#77718a;margin-top:4px}.task.done .task-info{text-decoration:line-through;opacity:.6}.task button{padding:8px 10px}.empty{color:#77718a;font-size:.93rem}.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}.day{background:#f6f3ff;border-radius:12px;padding:10px 7px;min-height:110px}.day strong{display:block;font-size:.78rem}.day .date{display:block;color:#77718a;font-size:.7rem;margin:3px 0 8px}.chip{display:block;background:#ddd5ff;color:#47319b;border-radius:7px;padding:5px;margin:4px 0;font-size:.73rem;overflow-wrap:anywhere}.weeknav{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:12px}.weeknav span{flex:1;text-align:center;font-weight:600}.timer{text-align:center;font-size:3.3rem;font-weight:750;letter-spacing:2px;color:#6040db;margin:10px}.timer-actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}.exam{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #eee}.exam:last-child{border:0}.exam strong{display:block}.exam small{color:#77718a}.exam .count{font-weight:750;color:#6242d7;white-space:nowrap}.tip{font-size:.83rem;color:#77718a;margin:20px 0}#install{display:none}
+@media(max-width:780px){.grid{grid-template-columns:1fr}.wrap{padding:15px}.week{grid-template-columns:repeat(2,minmax(0,1fr))}.day{min-height:85px}.stats{gap:6px}.stat{padding:11px 5px}.stat strong{font-size:1.3rem}}
+@media(min-width:520px) and (max-width:780px){.week{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+.flashcard{border:2px solid #ddd4ff;border-radius:16px;background:linear-gradient(145deg,#faf9ff,#eee8ff);min-height:155px;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;font-weight:650;cursor:pointer;overflow-wrap:anywhere}
+.flashcard:focus{outline:3px solid #9c88f5}.flash-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.flash-actions button{flex:1}.study-suggestion{padding:11px;background:#f4f0ff;border-radius:10px;margin:8px 0}.study-suggestion strong{display:block}.study-suggestion small{color:#736c86}
+</style>
+</head>
+<body><main class="wrap">
+<header><div><h1>📚 Revora</h1><p class="subtitle muted">Your revision. Your future. <strong>Version 3</strong></p></div><button id="install" type="button">Install app</button></header>
+<section class="panel"><h2>Your progress</h2><div class="stats"><div class="stat"><strong id="total">0</strong><span>Total tasks</span></div><div class="stat"><strong id="done">0</strong><span>Completed</span></div><div class="stat"><strong id="remaining">0</strong><span>Remaining</span></div></div></section>
+<div class="grid"><div>
+<section class="panel"><h2>➕ Add a revision task</h2><form id="taskForm"><label class="field">What will you revise?<input name="task" maxlength="120" placeholder="e.g. Revise Macbeth quotes" required></label><div class="formrow"><label class="field">Subject<select name="subject"><option>English</option><option>Maths</option><option>Biology</option><option>Chemistry</option><option>Physics</option><option>Geography</option><option>History</option><option>Spanish</option><option>Other</option></select></label><label class="field">Revision date<input name="date" type="date" required></label></div><button type="submit">+ Add task</button></form></section>
+<section class="panel"><h2>✨ Suggested revision</h2><p class="muted">Based on your unfinished tasks and upcoming exams. These are suggestions, not automatically scheduled sessions.</p><div id="suggestions"></div></section>
+<section class="panel"><h2>📅 Weekly timetable</h2><div class="weeknav"><button class="secondary" id="prevWeek" type="button">← Previous</button><span id="weekLabel"></span><button class="secondary" id="nextWeek" type="button">Next →</button><button class="secondary" id="todayWeek" type="button">Today</button></div><div class="week" id="week"></div></section>
+<section class="panel"><h2>✅ Revision tasks</h2><div id="tasks" aria-live="polite"></div></section>
+</div><div>
+<section class="panel"><h2>⏱️ Focus timer</h2><p class="muted">25 minutes of focused revision</p><div class="timer" id="timer" aria-live="off">25:00</div><div class="timer-actions"><button id="startTimer">Start</button><button class="secondary" id="pauseTimer">Pause</button><button class="secondary" id="resetTimer">Reset</button></div><p id="timerMessage" class="muted" style="text-align:center" aria-live="polite">Ready when you are!</p></section>
+<section class="panel"><h2>🎓 Exam countdown</h2><form id="examForm"><label class="field">Exam name<input name="name" placeholder="e.g. GCSE Maths Paper 1" maxlength="100" required></label><label class="field">Exam date<input name="date" type="date" required></label><button type="submit">+ Add exam</button></form><div id="exams" style="margin-top:12px"></div></section>
+<section class="panel"><h2>🧠 Flashcards</h2>
+<form id="cardForm"><label class="field">Subject<select name="subject"><option>English</option><option>Maths</option><option>Biology</option><option>Chemistry</option><option>Physics</option><option>Geography</option><option>History</option><option>Spanish</option><option>Other</option></select></label><label class="field">Question<input name="question" maxlength="220" placeholder="What is a metaphor?" required></label><label class="field">Answer<input name="answer" maxlength="500" placeholder="A comparison without like or as" required></label><button type="submit">+ Add flashcard</button></form>
+<div style="margin-top:18px"><p class="muted" id="cardCounter"></p><div id="flashcard" class="flashcard" role="button" tabindex="0" aria-label="Flip flashcard">Add a card to start</div><div class="flash-actions"><button class="secondary" type="button" id="prevCard">← Previous</button><button type="button" id="flipCard">Flip card</button><button class="secondary" type="button" id="nextCard">Next →</button></div><button type="button" class="danger" id="deleteCard">Delete current card</button></div>
+</section>
+<section class="panel"><h2>💾 Your data</h2><p class="muted">Tasks and exams save automatically in this browser on this device.</p><button class="secondary" id="exportData" type="button">Export backup (.json)</button>
+<label class="field" style="margin-top:12px">Import a Revora backup (.json)<input type="file" id="importData" accept=".json,application/json"></label><p id="importMessage" class="muted" aria-live="polite"></p><p class="muted" style="font-size:.82rem">Keep a backup before replacing files or clearing browser data.</p></section>
+</div></div>
+<p class="tip">To install on phones, the app must be hosted securely (HTTPS). A local HTML file is for testing. The timer runs while this page is open; switching apps may affect its timing.</p>
+</main>
+<script>
+'use strict';
+const TASK_KEY='revora-tasks-v1',EXAM_KEY='revora-exams-v2',CARD_KEY='revora-cards-v3';
+function load(key){try{const x=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(x)?x:[]}catch{return []}}
+let tasks=load(TASK_KEY),exams=load(EXAM_KEY),cards=load(CARD_KEY);
+const $=id=>document.getElementById(id);
+function localDate(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function parseDate(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
+function dateLabel(s){return parseDate(s).toLocaleDateString(undefined,{day:'numeric',month:'short'})}
+function make(tag,txt,cls){const el=document.createElement(tag);if(txt!==undefined)el.textContent=txt;if(cls)el.className=cls;return el}
+function saveTasks(){localStorage.setItem(TASK_KEY,JSON.stringify(tasks))}
+function saveExams(){localStorage.setItem(EXAM_KEY,JSON.stringify(exams))}
+function saveCards(){localStorage.setItem(CARD_KEY,JSON.stringify(cards))}
+function id(){return (globalThis.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+Math.random()}
+const taskForm=$('taskForm'),examForm=$('examForm');taskForm.elements.date.value=localDate();examForm.elements.date.value=localDate();
+let weekOffset=0;
+function renderTasks(){
+ $('tasks').replaceChildren();
+ $('total').textContent=tasks.length;$('done').textContent=tasks.filter(t=>t.done).length;$('remaining').textContent=tasks.filter(t=>!t.done).length;
+ if(!tasks.length)$('tasks').append(make('p','No tasks yet. Add your first task above!','empty'));
+ tasks.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))).forEach(t=>{
+  const row=make('div',undefined,'task'+(t.done?' done':'')),cb=make('input'),info=make('div',t.task,'task-info'),sm=make('small',t.subject+' · '+t.date),del=make('button','Delete','danger');
+  cb.type='checkbox';cb.checked=!!t.done;cb.setAttribute('aria-label','Complete '+t.task);info.append(sm);
+  cb.addEventListener('change',()=>{t.done=cb.checked;saveTasks();renderAll()});
+  del.addEventListener('click',()=>{tasks=tasks.filter(x=>x.id!==t.id);saveTasks();renderAll()});
+  row.append(cb,info,del);$('tasks').append(row);
+ });
+}
+function renderWeek(){
+ const start=new Date();start.setHours(12,0,0,0);start.setDate(start.getDate()-(start.getDay()+6)%7+weekOffset*7);
+ const end=new Date(start);end.setDate(start.getDate()+6);
+ $('weekLabel').textContent=dateLabel(localDate(start))+' – '+dateLabel(localDate(end));
+ $('week').replaceChildren();
+ for(let i=0;i<7;i++){
+  const day=new Date(start);day.setDate(start.getDate()+i);const key=localDate(day);
+  const cell=make('div',undefined,'day');cell.append(make('strong',day.toLocaleDateString(undefined,{weekday:'short'})),make('span',dateLabel(key),'date'));
+  const matches=tasks.filter(t=>t.date===key);
+  if(!matches.length)cell.append(make('span','No tasks','empty'));
+  matches.forEach(t=>cell.append(make('span',(t.done?'✓ ':'')+t.subject+': '+t.task,'chip')));
+  $('week').append(cell);
+ }
+}
+function renderExams(){
+ $('exams').replaceChildren();
+ if(!exams.length)$('exams').append(make('p','No exams added yet.','empty'));
+ exams.slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
+  const row=make('div',undefined,'exam'),info=make('div'),label=make('strong',e.name),sm=make('small',e.date),count=make('span',undefined,'count'),del=make('button','✕','danger');
+  const days=Math.round((parseDate(e.date)-parseDate(localDate()))/86400000);
+  count.textContent=days>0?days+' days left':days===0?'Today!':'Passed';
+  del.setAttribute('aria-label','Delete exam '+e.name);del.addEventListener('click',()=>{exams=exams.filter(x=>x.id!==e.id);saveExams();renderExams();renderSuggestions()});
+  info.append(label,sm);row.append(info,count,del);$('exams').append(row);
+ });
+}
+function renderSuggestions(){
+ $('suggestions').replaceChildren();
+ const today=localDate(),pending=tasks.filter(t=>!t.done).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3);
+ const upcoming=exams.filter(e=>e.date>=today).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,2);
+ if(!pending.length&&!upcoming.length){$('suggestions').append(make('p','Add some tasks or exam dates to see suggestions.','empty'));return}
+ pending.forEach(t=>{const el=make('div',undefined,'study-suggestion');el.append(make('strong',t.subject+': '+t.task),make('small',t.date<today?'Overdue task':t.date===today?'Scheduled for today':'Scheduled '+t.date));$('suggestions').append(el)});
+ upcoming.forEach(e=>{const el=make('div',undefined,'study-suggestion');el.append(make('strong','Prepare for '+e.name),make('small','Exam '+e.date));$('suggestions').append(el)});
+}
+function renderAll(){renderTasks();renderWeek();renderExams();renderSuggestions()}
+taskForm.addEventListener('submit',e=>{e.preventDefault();const f=taskForm.elements;const task=f.task.value.trim();if(!task||!f.date.value)return;tasks.push({id:id(),task,subject:f.subject.value,date:f.date.value,done:false});saveTasks();renderAll();f.task.value='';f.task.focus()});
+examForm.addEventListener('submit',e=>{e.preventDefault();const f=examForm.elements;const name=f.name.value.trim();if(!name||!f.date.value)return;exams.push({id:id(),name,date:f.date.value});saveExams();renderExams();renderSuggestions();f.name.value=''});
+$('prevWeek').onclick=()=>{weekOffset--;renderWeek()};$('nextWeek').onclick=()=>{weekOffset++;renderWeek()};$('todayWeek').onclick=()=>{weekOffset=0;renderWeek()};
+let remaining=1500,deadline=null,interval=null;
+function displayTimer(){$('timer').textContent=`${String(Math.floor(remaining/60)).padStart(2,'0')}:${String(remaining%60).padStart(2,'0')}`}
+function tick(){if(deadline===null)return;remaining=Math.max(0,Math.ceil((deadline-Date.now())/1000));displayTimer();if(remaining===0){clearInterval(interval);interval=null;deadline=null;$('timerMessage').textContent='Session finished! Time for a break 🎉'}}
+$('startTimer').onclick=()=>{if(deadline!==null||remaining===0)return;deadline=Date.now()+remaining*1000;interval=setInterval(tick,250);$('timerMessage').textContent='Focus time!';tick()};
+$('pauseTimer').onclick=()=>{if(deadline===null)return;tick();clearInterval(interval);interval=null;deadline=null;$('timerMessage').textContent='Paused'};
+$('resetTimer').onclick=()=>{clearInterval(interval);interval=null;deadline=null;remaining=1500;displayTimer();$('timerMessage').textContent='Ready when you are!'};
+$('exportData').onclick=()=>{const data=JSON.stringify({app:'Revora',version:3,tasks,exams,cards},null,2);const url=URL.createObjectURL(new Blob([data],{type:'application/json'}));const a=make('a');a.href=url;a.download='revora-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+let cardIndex=0,showAnswer=false;
+function renderCard(){
+ const has=cards.length>0;
+ if(cardIndex>=cards.length)cardIndex=Math.max(0,cards.length-1);
+ $('cardCounter').textContent=has?`Card ${cardIndex+1} of ${cards.length} · ${cards[cardIndex].subject}`:'No flashcards yet';
+ $('flashcard').textContent=has?(showAnswer?'Answer: '+cards[cardIndex].answer:'Question: '+cards[cardIndex].question):'Add a card to start';
+ for(const id of ['prevCard','nextCard','flipCard','deleteCard'])$(id).disabled=!has;
+}
+function flip(){if(cards.length){showAnswer=!showAnswer;renderCard()}}
+$('cardForm').addEventListener('submit',e=>{e.preventDefault();const f=e.currentTarget.elements;const question=f.question.value.trim(),answer=f.answer.value.trim();if(!question||!answer)return;cards.push({id:id(),subject:f.subject.value,question,answer});saveCards();cardIndex=cards.length-1;showAnswer=false;renderCard();f.question.value='';f.answer.value=''});
+$('flipCard').onclick=flip;$('flashcard').onclick=flip;$('flashcard').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}};
+$('prevCard').onclick=()=>{if(cards.length){cardIndex=(cardIndex-1+cards.length)%cards.length;showAnswer=false;renderCard()}};
+$('nextCard').onclick=()=>{if(cards.length){cardIndex=(cardIndex+1)%cards.length;showAnswer=false;renderCard()}};
+$('deleteCard').onclick=()=>{if(!cards.length)return;cards.splice(cardIndex,1);saveCards();showAnswer=false;renderCard()};
+$('importData').addEventListener('change',async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{
+  if(file.size>2_000_000)throw Error('Backup is too large');
+  const data=JSON.parse(await file.text());
+  if(data.app!=='Revora'||!Array.isArray(data.tasks)||!Array.isArray(data.exams)|| (data.cards!==undefined&&!Array.isArray(data.cards)))throw Error('Not a supported Revora backup');
+  if(!confirm('Replace your current tasks, exams and flashcards with this backup?'))return;
+  const validTask=t=>t&&typeof t.id==='string'&&typeof t.task==='string'&&typeof t.subject==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.date)&&typeof t.done==='boolean';
+  const validExam=x=>x&&typeof x.id==='string'&&typeof x.name==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x.date);
+  const validCard=c=>c&&typeof c.id==='string'&&typeof c.subject==='string'&&typeof c.question==='string'&&typeof c.answer==='string';
+  if(!data.tasks.every(validTask)||!data.exams.every(validExam)||!(data.cards||[]).every(validCard))throw Error('Backup contains invalid records');
+  tasks=data.tasks;exams=data.exams;cards=data.cards||[];
+  saveTasks();saveExams();saveCards();cardIndex=0;showAnswer=false;renderAll();renderCard();
+  $('importMessage').textContent='Backup imported successfully.';
+ }catch(err){$('importMessage').textContent='Import failed: '+err.message}
+ finally{e.target.value=''}
+});
+renderAll();renderCard();
+if('serviceWorker'  in navigator && location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(console.warn));
+let deferredPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('install').style.display='inline-block'});
+$('install').onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$('install').style.display='none'};
+</script></body></html>
